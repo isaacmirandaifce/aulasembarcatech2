@@ -23,7 +23,7 @@ Em sistemas embarcados, essas práticas são ainda mais importantes porque o sof
 * erros de temporização
 * regressões após alterações no firmware
 
-Sem depuração e versionamento, a evolução do projeto se torna caótica.
+Sem depuração e versionamento, a evolução do projeto pode se tornar caótica.
 
 ---
 
