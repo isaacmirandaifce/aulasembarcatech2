@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Índice UV</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+            <img src="logoCIDTS.png" alt="Logo CIDTS">
+        </div>
+            <h1>Índice UV</h1>
+            <div class="location">
+                <i class="fas fa-map-marker-alt gps-icon"></i>
+                <select id="location-select" onchange="fetchUVIndex()">
+                    <option value="Boa Viagem, Ceará">Boa Viagem, Ceará</option>
+                    <option value="Canindé, Ceará">Canindé, Ceará</option>
+                    <option value="Fortaleza, Ceará">Fortaleza, Ceará</option>
+                </select>
+            </div>
+        </div>
+        <div class="uv-index">
+            <span id="uv-value">10</span>
+        </div>
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <div class="progress-bar-legend">
+            <span>1</span>
+            <span>13</span>
+        </div>
+        <div class="recommendations">
+            <h2>Recomendações</h2>
+            <div class="icons">
+                <img src="cap.png" alt="Chapéu">
+                <img src="water.png" alt="Água">
+                <img src="cream.png" alt="Protetor Solar">
+            </div>
+        </div>
+        <div class="summary">
+            <h2>Sumário</h2>
+            <div class="chart">
+                <canvas id="uvChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,151 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #e0f7fa;
+    color: #FC9601; /* Set global text color */
+}
+
+div.background {
+    background: lightblue url(cap.png) no-repeat center;
+    background-size: cover;
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    height: 400px;
+    width: 400px;
+  }
+
+.container {
+    width: 100%;
+    max-width: 400px;
+    max-height: 100%;
+    margin: 0 auto;
+    padding: 20px;
+    padding-top: 20px;
+    text-align: center;
+    /*background-color: #e0f7fa; /* Match the background color */
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+    background-color: #e0f7fa; /* Match the container background color */
+    padding: 20px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 24px;
+    color: #FC9601; /* Ensure header text color */
+}
+
+.location {
+    margin-top: 10px;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    background-color: #e0f7fa; /* Match the container background color */
+    padding: 5px;
+    border-radius: 5px;
+    color: #FC9601; /* Ensure location text color */
+}
+
+.gps-icon {
+    font-size: 20px;
+    margin-right: 10px;
+    color: #FC9601; /* Ensure icon color */
+}
+
+#location-select {
+    font-size: 16px;
+    padding: 5px;
+    border-radius: 5px;
+    /*border: 1px solid #ccc;*/
+    border: none;
+    background-color: #e0f7fa; /* Match the container background color */
+    color: #FC9601; /* Ensure select text color */
+    flex-grow: 1;
+}
+
+.uv-index {
+    background-color: #ffab00;
+    margin: 20px 0;
+    padding: 20px;
+    border-radius: 10px;
+    font-size: 48px;
+    color: #ffffff;
+}
+
+.progress-bar-container {
+    width: 100%;
+    background-color: #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+    position: relative;
+    height: 30px;
+    margin-bottom: 10px;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(to right, blue, red);
+    transition: width 0.3s;
+}
+
+.progress-bar-legend {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: #FC9601; /* Ensure legend text color */
+}
+
+.recommendations {
+    background-color: #e0f7fa; /* Match the container background color */
+    padding: 20px;
+    border-radius: 0px;
+    margin-bottom: 20px;
+    color: #FC9601; /* Ensure recommendations text color */
+    border: 1px solid;
+}
+
+.recommendations h2 {
+    margin-top: 0;
+    color: #FC9601; /* Ensure recommendations header color */
+    text-align: left;
+}
+
+.icons img {
+    width: 60px;
+    margin: 0 10px;
+}
+
+.logo img {
+    width: 200px;
+    margin: 0 10px;
+}
+
+.summary {
+    /*background-color: #e0f7fa; /* Match the container background color */
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    color: #FC9601; /* Ensure summary text color */
+}
+
+.summary h2 {
+    color: #FC9601; /* Ensure summary header color */
+    text-align: left;
+}
+
+.chart {
+    position: relative;
+    height: 200px;
+}
