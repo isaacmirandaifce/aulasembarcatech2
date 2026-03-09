@@ -317,7 +317,7 @@ projeto/
 
 ```mermaid
 flowchart LR
-A[Computador do Desenvolvedor] -->|push| B[GitHub]
+A[Computador do Desenvolvedor] -->|push| B[REMOTO]
 B -->|pull| A
 ```
 
