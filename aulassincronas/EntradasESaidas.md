@@ -164,7 +164,58 @@ int main() {
 ```
 
 ---
+# Interação tipo Toggle
 
+Para transformar a sua plaquinha em um interruptor (o famoso comportamento de toggle), o código precisa "lembrar" se o LED estava aceso ou apagado antes do novo aperto.
+
+````C
+#include "pico/stdlib.h"
+#include <stdbool.h> // Biblioteca necessária para usar a variável tipo 'bool'
+
+#define LED_PIN 13
+#define BTN_A_PIN 5 // Pino do Botão A na BitDogLab
+
+int main() {
+    // Configuração do LED
+    gpio_init(LED_PIN);
+    gpio_set_dir(LED_PIN, GPIO_OUT);
+
+    // Configuração do Botão
+    gpio_init(BTN_A_PIN);
+    gpio_set_dir(BTN_A_PIN, GPIO_IN);
+    gpio_pull_up(BTN_A_PIN); 
+
+    // Variável que guarda o estado atual do LED (inicia apagado)
+    bool led_state = false; 
+
+    while (true) {
+        // Verifica se o botão foi pressionado (0 = pressionado devido ao pull-up)
+        if (gpio_get(BTN_A_PIN) == 0) { 
+            
+            // 1. DEBOUNCE: Espera 50ms para o botão parar de "tremer" fisicamente
+            sleep_ms(50); 
+            
+            // 2. CONFIRMAÇÃO: Verifica se o botão continua apertado após os 50ms
+            if (gpio_get(BTN_A_PIN) == 0) {
+                
+                // Inverte o estado atual do LED (! significa "não/inverso")
+                // Se era false (0) vira true (1), se era true (1) vira false (0)
+                led_state = !led_state; 
+                gpio_put(LED_PIN, led_state); // Aplica a nova energia ao pino do LED
+                
+                // 3. TRAVAMENTO: Prende o código aqui enquanto o usuário segurar o botão
+                // Isso impede que o estado inverta centenas de vezes por segundo enquanto seu dedo está lá
+                while (gpio_get(BTN_A_PIN) == 0) {
+                    sleep_ms(10); // Apenas espera o dedo soltar
+                }
+            }
+        }
+        
+        sleep_ms(10); // Pequeno atraso para estabilizar o loop principal
+    }
+}
+````
+---
 ## O Efeito Bounce (Repique Mecânico)
 
 * **O Problema:** Dentro do botão há uma mola metálica. Quando apertada, ela "quica" microscopicamente antes de estabilizar.
