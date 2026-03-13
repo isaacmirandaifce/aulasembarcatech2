@@ -13,7 +13,7 @@
 
 ---
 
-## O "Hello World" do Hardware (20 min)
+## O "Hello World" do Hardware
 
 **Configurando uma Saída Digital (Controlando o LED Vermelho)**
 
@@ -55,9 +55,12 @@ int main() {
 
 * **O Problema:** Um botão é apenas um pedaço de metal que une dois fios. Como o RP2040 sabe se ele foi apertado?
 
-
+<img src="https://polynoteshub.co.in/wp-content/uploads/2025/08/different-types-of-push-buttons-or-switches-1536x1288.jpg" alt="pull-up" width="500">
 
 * **Resistores de Pull-up:** O microcontrolador não gosta de pinos "flutuando". Usamos `gpio_pull_up()` para forçar o pino a ler `HIGH` (1) quando o botão está solto. Quando apertamos, ele conecta ao GND e lê `LOW` (0).
+
+<img src="https://cdn.sparkfun.com/assets/6/f/b/c/7/511568b6ce395f1b40000000.jpg" alt="pull-up" width="500">
+  
 
 **Fluxo de Configuração:**
 
@@ -113,6 +116,10 @@ int main() {
 * **A Consequência:** Para o chip, um aperto humano parece 20 apertos em milissegundos!
 * **A Solução (Debounce):** Mandar o código "esperar" uns 50 milissegundos para o contato físico estabilizar.
 
+<img src="https://github.com/isaacmirandaifce/aulasembarcatech2/blob/main/mentorias/imagens/tact_switch.jpg?raw=true" alt="tact" width="500">
+<img src="https://github.com/isaacmirandaifce/aulasembarcatech2/blob/main/mentorias/imagens/debounce.png?raw=true" alt="debounce" width="500">
+
+
 ---
 
 ## Derrotando o Bounce
@@ -150,5 +157,40 @@ Agora é com vocês!
 * Estado 2: Liga apenas Verde (13).
 * Estado 3: Liga apenas Azul (11). (Apertar novamente volta pro 0).
 
-
 * **Ação do Botão B:** Botão de emergência! Quando pressionado, zera a máquina (Estado 0) apagando tudo instantaneamente.
+
+* Fluxograma da atividade
+
+````mermaid
+stateDiagram-v2
+    %% Definição de estilo
+    classDef red fill:#ffcccc,stroke:#000000,stroke-width:2px,color:#000000;
+    classDef green fill:#ccffcc,stroke:#000000,stroke-width:2px,color:#000000;
+    classDef blue fill:#ccccff,stroke:#000000,stroke-width:2px,color:#000000;
+    classDef off fill:#eeeeee,stroke:#000000,stroke-width:2px,color:#000000;
+
+   [*] --> Estado0 : Início do Firmware
+
+    Estado0 : Estado 0 - Todos Apagados
+    class Estado0 off
+    
+    Estado1 : Estado 1 - LED Vermelho ON (12)
+    class Estado1 red
+    
+    Estado2 : Estado 2 - LED Verde ON (13)
+    class Estado2 green
+    
+    Estado3 : Estado 3 - LED Azul ON (11)
+    class Estado3 blue
+
+    %% Transições do Botão A (Avança estado)
+    Estado0 --> Estado1 : Botão A (GPIO 5)
+    Estado1 --> Estado2 : Botão A (GPIO 5)
+    Estado2 --> Estado3 : Botão A (GPIO 5)
+    Estado3 --> Estado0 : Botão A (GPIO 5)
+
+    %% Transições do Botão B (Emergência)
+    Estado1 --> Estado0 : Botão B (Emergência - GPIO 6)
+    Estado2 --> Estado0 : Botão B (Emergência - GPIO 6)
+    Estado3 --> Estado0 : Botão B (Emergência - GPIO 6)
+````
