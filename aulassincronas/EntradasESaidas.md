@@ -49,6 +49,17 @@ int main() {
 
 ---
 
+#Estrutura do LED RGB
+
+![LED RGB](https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/LED_-_5mm_Cycling_RGB.jpg/330px-LED_-_5mm_Cycling_RGB.jpg)
+
+https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/The_internal_view_of_a_Cycling_RGB_LED.gif/500px-The_internal_view_of_a_Cycling_RGB_LED.gif
+
+```mermaid
+```
+
+---
+
 ## Lendo sinais externos
 
 **Ler um Botão (Entrada Digital)**
