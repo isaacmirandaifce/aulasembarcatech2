@@ -24,14 +24,14 @@
 3. `gpio_put(PINO, ESTADO)`: Manda 1 (liga) ou 0 (desliga).
 
 
-* **Hipótese:** Se usarmos o pino 12 (LED Vermelho) num `while(true)`, o que acontece?
+* **Hipótese:** Se usarmos o pino 13 (LED Vermelho) num `while(true)`, o que acontece?
 
 **O Código (Firmware):**
 
 ```c
 #include "pico/stdlib.h"
 
-#define LED_R_PIN 12 // Pino do LED Vermelho na BitDogLab
+#define LED_R_PIN 13 // Pino do LED Vermelho na BitDogLab
 
 int main() {
     gpio_init(LED_R_PIN);
@@ -86,7 +86,7 @@ graph LR
 ```c
 #include "pico/stdlib.h"
 
-#define LED_R_PIN 12
+#define LED_R_PIN 13
 #define BTN_A_PIN 5 // Pino do Botão A na BitDogLab
 
 int main() {
@@ -149,13 +149,13 @@ Agora é com vocês!
 
 **Requisitos do Sistema na BitDogLab:**
 
-* **LED RGB:** Vermelho (12), Verde (13) e Azul (11).
+* **LED RGB:** Vermelho (13), Verde (11) e Azul (12).
 * **Botões:** A (5) e B (6).
 * **Ação do Botão A:** Pressionado (com Debounce!), avança o estado:
 * Estado 0: Todos apagados.
-* Estado 1: Liga apenas Vermelho (12).
-* Estado 2: Liga apenas Verde (13).
-* Estado 3: Liga apenas Azul (11). (Apertar novamente volta pro 0).
+* Estado 1: Liga apenas Vermelho (13).
+* Estado 2: Liga apenas Verde (11).
+* Estado 3: Liga apenas Azul (12). (Apertar novamente volta pro 0).
 
 * **Ação do Botão B:** Botão de emergência! Quando pressionado, zera a máquina (Estado 0) apagando tudo instantaneamente.
 
