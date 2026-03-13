@@ -49,15 +49,59 @@ int main() {
 
 ---
 
-#Estrutura do LED RGB
+# Estrutura do LED RGB 
 
 ![LED RGB](https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/LED_-_5mm_Cycling_RGB.jpg/330px-LED_-_5mm_Cycling_RGB.jpg)
 
 https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/The_internal_view_of_a_Cycling_RGB_LED.gif/500px-The_internal_view_of_a_Cycling_RGB_LED.gif
 
+<details> <summary>Desafio</summary> 
+
+Desenvolva o firmware de uma luminária inteligente que utiliza um único botão para navegar entre diferentes modos de iluminação. A luminária possui um LED RGB (composto por três LEDs internos: Vermelho, Verde e Azul) e deve funcionar seguindo uma lógica de estados finitos.
+
 ```mermaid
+flowchart TD
+    Start([Início]) --> Init[Inicializar Pinos<br/>LEDs como Saída<br/>Botão como Entrada Pull-up]
+    Init --> Var[passo = 0]
+    
+    Var --> Loop{Início do Loop}
+    
+    Loop --> BtnPress{Botão foi<br/>Pressionado?}
+    BtnPress -- Não --> Loop
+    
+    BtnPress -- Sim --> Debounce[Aguardar 50ms<br/>Debounce]
+    Debounce --> Confirm{Ainda está<br/>pressionado?}
+    
+    Confirm -- Não --> Loop
+    Confirm -- Sim --> Increment[passo = passo + 1]
+    
+    Increment --> CheckOverflow{passo > 7?}
+    CheckOverflow -- Sim --> ResetPasso[passo = 0]
+    CheckOverflow -- Não --> Switch
+    ResetPasso --> Switch
+    
+    subgraph Lógica de Cores
+    Switch{Qual o valor<br/>de passo?}
+    Switch -- 0 --> C0[Tudo Apagado]
+    Switch -- 1 --> C1[Vermelho]
+    Switch -- 2 --> C2[Verde]
+    Switch -- 3 --> C3[Azul]
+    Switch -- 4 --> C4[Amarelo]
+    Switch -- 5 --> C5[Ciano]
+    Switch -- 6 --> C6[Magenta]
+    Switch -- 7 --> C7[Branco]
+    end
+    
+    C0 & C1 & C2 & C3 & C4 & C5 & C6 & C7 --> WaitRelease{Botão ainda<br/>pressionado?}
+    
+    WaitRelease -- Sim --> Sleep[Aguardar 10ms]
+    Sleep --> WaitRelease
+    
+    WaitRelease -- Não --> Loop
 ```
 
+</details>
+ 
 ---
 
 ## Lendo sinais externos
