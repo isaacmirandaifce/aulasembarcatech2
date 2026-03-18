@@ -81,49 +81,64 @@ Aqui está o código completo do nosso firmware de alarme:
 #define LED_PIN 13
 #define BUZZER_PIN 21
 
+// Função para gerar som no buzzer passivo (Onda Quadrada via Software)
+void emitir_bip(uint pino, uint frequencia, uint duracao_ms) {
+    // Calcula o tempo de cada ciclo em microssegundos (1 segundo = 1.000.000 us)
+    uint periodo_us = 1000000 / frequencia; 
+    uint meio_periodo_us = periodo_us / 2;
+    // Calcula quantos ciclos cabem na duração desejada
+    uint ciclos = (duracao_ms * 1000) / periodo_us; 
+
+    // Loop que faz a membrana do buzzer vibrar
+    for (uint i = 0; i < ciclos; i++) {
+        gpio_put(pino, 1);       // Liga o buzzer
+        sleep_us(meio_periodo_us); // Espera metade do tempo
+        gpio_put(pino, 0);       // Desliga o buzzer
+        sleep_us(meio_periodo_us); // Espera a outra metade
+    }
+}
+
 int main() {
     // 1. SETUP: Inicialização
-    stdio_init_all(); // Inicia monitor serial
+    stdio_init_all(); 
 
-    // Configura o LED (Saída)
     gpio_init(LED_PIN);
     gpio_set_dir(LED_PIN, GPIO_OUT);
     gpio_put(LED_PIN, 0);
 
-    // Configura o Buzzer (Saída)
     gpio_init(BUZZER_PIN);
     gpio_set_dir(BUZZER_PIN, GPIO_OUT);
     gpio_put(BUZZER_PIN, 0);
 
-    // Configura o Botão (Entrada com Pull-up interno)
     gpio_init(BOTAO_PIN);
     gpio_set_dir(BOTAO_PIN, GPIO_IN);
-    gpio_pull_up(BOTAO_PIN);
+    gpio_pull_up(BOTAO_PIN); // Pull-up interno ativado
 
     printf("Sistema de Alarme Iniciado!\n");
 
-    // 2. SUPER LOOP: Execução contínua
+    // 2. SUPER LOOP
     while (true) {
-        // Verifica se o botão foi pressionado (Nível Lógico Baixo devido ao pull-up)
+        // Verifica se o botão foi pressionado
         if (gpio_get(BOTAO_PIN) == 0) {
             printf("Alarme Disparado!\n");
             
-            // Liga Atuadores
+            // Liga o LED de Alerta
             gpio_put(LED_PIN, 1);
-            gpio_put(BUZZER_PIN, 1);
-            sleep_ms(300); // Mantém ligado por 300ms
             
-            // Desliga Atuadores
+            // Chama a função para tocar o buzzer a 1000Hz (1kHz) por 300 milissegundos
+            emitir_bip(BUZZER_PIN, 1000, 300);
+            
+            // Desliga o LED após o som terminar
             gpio_put(LED_PIN, 0);
-            gpio_put(BUZZER_PIN, 0);
-            sleep_ms(300); // Pausa antes do próximo ciclo
+            
+            sleep_ms(300); // Pausa antes de repetir se o botão continuar pressionado
         } else {
-            // Garante que o alarme fique desligado em repouso
+            // Em repouso, o LED fica apagado 
+            // (O buzzer já fica mudo naturalmente quando a função emitir_bip termina)
             gpio_put(LED_PIN, 0);
-            gpio_put(BUZZER_PIN, 0);
         }
         
-        sleep_ms(10); // Estabilidade do sistema (debounce simples)
+        sleep_ms(10); // Estabilidade do sistema
     }
 }
 ```
@@ -136,7 +151,7 @@ Para visualizar o que o microcontrolador está fazendo passo a passo, observe o 
 
 ```mermaid
 flowchart TD
-    Start([Ligar Placa / Reset]) --> Setup[Inicializar stdio, GPIOs 5, 10 e 21]
+    Start([Ligar Placa / Reset]) --> Setup[Inicializar stdio, GPIOs 5, 13 e 21]
     Setup --> Print[Imprimir: Sistema Iniciado]
     Print --> LoopStart((Início do\nSuper Loop))
     
