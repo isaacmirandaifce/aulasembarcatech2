@@ -78,7 +78,7 @@ Aqui está o código completo do nosso firmware de alarme:
 
 // Mapeamento de Hardware
 #define BOTAO_PIN 5
-#define LED_PIN 10
+#define LED_PIN 13
 #define BUZZER_PIN 21
 
 int main() {
