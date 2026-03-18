@@ -206,7 +206,4 @@ Como vocês alterariam o código que acabamos de ver para criar um **Controle de
 * Configurar entradas e saídas é o coração do sistema.
 * Controlamos o hardware via código usando o SDK da Raspberry Pi.
 
-**Espaço aberto:**
-Dúvidas sobre o código, instalação das ferramentas ou compilação do `.UF2`? 
-
 *Obrigado pela presença, nos vemos na próxima mentoria!*
