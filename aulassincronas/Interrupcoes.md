@@ -24,7 +24,7 @@ Para entender como um microcontrolador interage com o mundo externo, precisamos 
 ### 1. E/S Programada (Polling)
 No **Polling**, o processador atua de forma ativa e síncrona. Ele toma a iniciativa de perguntar, repetidas vezes, qual é o estado atual do periférico.
 
-* **A Analogia da Viagem de Carro:** Imagine uma viagem de carro com um burro falnte no banco de trás. A burro pergunta a cada 5 segundos: *"A gente já chegou?"*. O motorista (CPU) gasta uma quantidade enorme de energia e foco apenas para verificar a condição (chegar ao destino), impedindo que ele relaxe ou preste atenção em outras coisas.
+* **A Analogia da Viagem de Carro:** Imagine uma viagem de carro para um destino tão tão distante, com um burro falante no banco de trás. A burro pergunta a cada 5 segundos: *"A gente já chegou?"*. O motorista (CPU) gasta uma quantidade enorme de energia e foco apenas para verificar a condição (chegar ao destino), impedindo que ele relaxe ou preste atenção em outras coisas.
 * **Exemplo de Aplicação:** Um projeto muito simples de semáforo onde a placa só precisa acender LEDs sequencialmente e verificar se um botão de pedestre foi apertado. Como o sistema não tem mais nada para fazer, o *polling* é aceitável.
 * **Vantagens:** Extremamente simples de programar (um simples `if` dentro de um `while(true)`).
 * **Desvantagens:** Desperdício imenso de ciclos de processamento e consumo de energia elevado, pois a CPU nunca "descansa".
@@ -40,6 +40,72 @@ graph TD
     
     style B fill:#f9cfcf,stroke:#333,stroke-width:2px,color:#000000
 ```
+
+# Código exemplo:
+
+````C
+#include <stdio.h>
+#include "pico/stdlib.h"
+
+// Definindo os pinos
+#define PINO_BOTAO 5 // O "Burro falante"
+#define PINO_LED 11  // O destino "Tão Tão Distante"
+
+int main() {
+    // Inicializa a comunicação padrão
+    stdio_init_all();
+
+    // Uma pequena pausa inicial para dar tempo de você abrir o terminal serial
+    sleep_ms(2000);
+
+    // Configura o pino do LED como saída
+    gpio_init(PINO_LED);
+    gpio_set_dir(PINO_LED, GPIO_OUT);
+
+    // Configura o pino do botão como entrada com resistor Pull-Up interno
+    // Com o Pull-Up, o botão lerá "1" (HIGH) quando solto e "0" (LOW) quando pressionado
+    gpio_init(PINO_BOTAO);
+    gpio_set_dir(PINO_BOTAO, GPIO_IN);
+    gpio_pull_up(PINO_BOTAO);
+
+    // Trava elegante para aguardar o terminal serial abrir
+    while (!stdio_usb_connected()) {
+        sleep_ms(100);
+    }
+
+    printf("Iniciando a viagem para Tão Tão Distante...\n");
+
+    // O Loop Infinito da Viagem (Polling)
+    while (true) {
+        
+        // Verifica o estado do botão
+        if (gpio_get(PINO_BOTAO) == 0) { 
+            // Sim! O botão foi pressionado. (LOW)
+            gpio_put(PINO_LED, 1); // Acende o LED
+            printf("Chegamos!!! Finalmente paz e sossego.\n");
+            
+            // "Para" o microcontrolador
+            // Em sistemas embarcados, não usamos "exit(0)" como no PC. 
+            // Para interromper a execução, nós o prendemos em um loop infinito sem fazer nada.
+            while (true) {
+                sleep_ms(1000); // Apenas dorme eternamente com o LED aceso
+            }
+            
+        } else {
+            // Não, ainda não chegamos. (HIGH)
+            gpio_put(PINO_LED, 0); // Garante que o LED fique apagado
+            printf("A gente já chegou?\n");
+            
+            // Pausa de 1 segundo para o Burro não perguntar rápido demais 
+            // e travar a porta serial do seu computador
+            sleep_ms(1000); 
+        }
+        
+    }
+
+    return 0;
+}
+````
 
 ---
 
@@ -68,38 +134,335 @@ sequenceDiagram
     Note over C: Restaura o contexto<br/>Continua exatamente de onde parou
 ```
 
+# Código exemplo:
+
+````C
+#include <stdio.h>
+#include "pico/stdlib.h"
+
+// Definindo os pinos
+#define PINO_BOTAO 5 // O botão do nosso "Micro-ondas"
+#define PINO_LED 11  // A luz da cozinha para mostrar que levantamos
+
+// Variável global VOLÁTIL que serve como "sinal" entre a interrupção e o loop principal.
+// O "volatile" avisa ao compilador que essa variável pode mudar a qualquer momento no hardware.
+volatile bool comida_pronta = false;
+
+// -------------------------------------------------------------------------
+// ROTINA DE TRATAMENTO DE INTERRUPÇÃO (ISR / Callback)
+// Essa função é chamada AUTOMATICAMENTE pelo hardware quando o botão é apertado.
+// É o "apito" do micro-ondas. Ela deve ser o mais rápida possível!
+// -------------------------------------------------------------------------
+void microondas_apita_callback(uint gpio, uint32_t events) {
+    // Apenas sinalizamos que a comida está pronta e voltamos rápido para o que estávamos fazendo
+    comida_pronta = true;
+}
+
+int main() {
+    // Inicialização padrão
+    stdio_init_all();
+
+    // Trava elegante para aguardar o terminal serial abrir (como vimos antes)
+    while (!stdio_usb_connected()) {
+        sleep_ms(100);
+    }
+
+    printf("Terminal conectado! Fui para a sala ler um livro...\n");
+
+    // Configura o LED
+    gpio_init(PINO_LED);
+    gpio_set_dir(PINO_LED, GPIO_OUT);
+    gpio_put(PINO_LED, 0); // Começa apagado
+
+    // Configura o Botão com Pull-Up
+    gpio_init(PINO_BOTAO);
+    gpio_set_dir(PINO_BOTAO, GPIO_IN);
+    gpio_pull_up(PINO_BOTAO);
+
+    // -------------------------------------------------------------------------
+    // CONFIGURAÇÃO DA INTERRUPÇÃO
+    // Dizemos ao NVIC: "Se o PINO_BOTAO for de HIGH para LOW (Borda de Descida), 
+    // pause tudo e chame a função microondas_apita_callback".
+    // -------------------------------------------------------------------------
+    gpio_set_irq_enabled_with_callback(
+        PINO_BOTAO, 
+        GPIO_IRQ_EDGE_FALL, 
+        true, 
+        &microondas_apita_callback
+    );
+
+    // O Loop Principal da Vida (O que a CPU faz no seu tempo "livre")
+    while (true) {
+        
+        // Verificamos a flag alterada pela interrupção
+        if (comida_pronta) {
+            printf("\n[INTERRUPÇÃO!] Opa, o micro-ondas apitou! Indo buscar a comida...\n");
+            
+            // Simula a ação de ir até a cozinha (Acende o LED)
+            gpio_put(PINO_LED, 1);
+            sleep_ms(2000); // Demora 2 segundos pegando a comida
+            gpio_put(PINO_LED, 0); // Apaga a luz e volta
+            
+            printf("Comida deliciosa. Voltando para o meu livro...\n\n");
+            
+            // Reseta a flag para podermos ser interrompidos de novo no futuro
+            comida_pronta = false; 
+        }
+
+        // Tarefa principal (lendo o livro)
+        // A CPU não está perguntando pelo botão aqui! Ela está apenas vivendo a vida dela.
+        printf("Lendo a página do livro...\n");
+        sleep_ms(1500); // Lê uma página a cada 1.5 segundos
+    }
+
+    return 0;
+}
+````
+
 ---
 
 ### 3. Acesso Direto à Memória (DMA - Direct Memory Access)
-O DMA introduz um **co-processador** de hardware dedicado exclusivamente a mover blocos de informações pela placa, tirando essa carga da CPU principal.
 
-* **A Analogia da Transportadora:** Imagine que você é o gerente de uma fábrica (CPU) e precisa mover 10.000 caixas do armazém (Periférico) para a loja (Memória). Se você for carregar caixa por caixa, mesmo sendo rápido, vai passar o dia inteiro fazendo trabalho braçal e a fábrica vai parar. A solução? Você contrata uma transportadora (Controlador DMA). Você diz ao gerente deles: *"Leve essas 10.000 caixas para a loja e só me chame no rádio quando terminar"*. Você fica livre para assinar contratos importantes, enquanto as caixas são movidas nos bastidores.
-* **Exemplo de Aplicação:** Conversão contínua de áudio. Se o microcontrolador precisa ler um microfone (ADC) a 44.100 amostras por segundo, usar interrupções para cada leitura travaria a placa. O DMA coleta todas as leituras de áudio e joga direto em um *buffer* na memória RAM. A CPU só é interrompida quando o *buffer* está cheio e pronto para ser processado (ex: para aplicar um filtro ou salvar num cartão SD).
-* **Vantagens:** Desempenho extremo para grandes volumes de dados (áudio, displays de vídeo, comunicação de rede).
-* **Desvantagens:** Configuração dos registradores do DMA costuma ser complexa e requer um hardware mais avançado (embora chips modernos como o RP2040, usado na Pico W, tenham excelentes controladores DMA).
+O DMA é um **co-processador de hardware** dedicado exclusivamente a mover blocos de informações entre periféricos e a memória, tirando totalmente essa carga da CPU principal.
 
+* Ler um sensor continuamente, fazendo leituras seguidas e calculando médias exige que a CPU fique presa em um loop (`for` ou `while`), impedindo-a de responder a outros eventos rapidamente.
+* **A Solução :** A CPU configura o DMA dizendo: *"Colete 10 amostras de temperatura do ADC, guarde no vetor `buffer_temp` e só me avise quando terminar"*.
+* **O Resultado:** A CPU fica 100% livre! No nosso exemplo, enquanto o DMA coleta a temperatura, a CPU consegue responder instantaneamente à interrupção do Botão A e trocar a cor do LED.
 
+---
 
-**Diagrama de Arquitetura (DMA vs CPU):**
+## Arquitetura do Sistema (DMA + Interrupção)
+**Como o RP2040 divide o trabalho?**
+
 ```mermaid
 graph TD
-    subgraph Sem DMA
-        S1[Periférico ADC] -->|Dado 1| CPU1[CPU]
-        CPU1 -->|Dado 1| RAM1[Memória RAM]
-        S1 -->|Dado 2| CPU1
-        CPU1 -->|Dado 2| RAM1
+    subgraph O Assistente 
+        ADC[Módulo ADC<br>Sensor de Temperatura] -.->|Avisa via DREQ| DMA[Controlador DMA]
+        ADC -->|Envia as leituras| RAM[Memória RAM buffer_temp]
     end
 
-    subgraph Com DMA
-        S2[Periférico ADC] -->|Dados em Massa| Barramento
-        Barramento -->|Dados em Massa| RAM2[Memória RAM]
-        DMA[Controlador DMA] -.->|Gerencia o tráfego| Barramento
-        CPU2[CPU Livre!] -.->|Configura e aguarda| DMA
+    subgraph O Gerente
+        BOTAO((Botão A)) -.->|Interrompe| CPU[CPU]
+        CPU -->|Muda a cor na hora!| LED[LED RGB]
+        CPU -.->|Processa a média térmica quando o DMA termina| RAM
     end
     
     style DMA fill:#d4e1f5,stroke:#333,stroke-width:2px,color:#000000
-    style CPU2 fill:#cff9cf,stroke:#333,stroke-width:2px,color:#000000
+    style CPU fill:#cff9cf,stroke:#333,stroke-width:2px,color:#000000
+    style BOTAO fill:#f9cfcf,stroke:#333,color:#000000
 ```
+
+---
+
+## Configurando o DMA (Pico SDK)
+
+Para usar o DMA, configuramos um "canal" com as regras de transporte:
+
+```c
+int configurar_dma(dma_channel_config *cfg) {
+    int canal = dma_claim_unused_channel(true); // Pega um canal livre
+    *cfg = dma_channel_get_default_config(canal);
+    
+    // Tamanho da "caixa": 16 bits (tamanho do dado do ADC)
+    channel_config_set_transfer_data_size(cfg, DMA_SIZE_16);
+    
+    // De onde ler? Do mesmo lugar sempre (Registro do ADC)
+    channel_config_set_read_increment(cfg, false); 
+    
+    // Onde gravar? Andar pelo vetor para salvar as 10 amostras
+    channel_config_set_write_increment(cfg, true); 
+    
+    // Ritmo: Só transporte quando o ADC gritar que tem dado novo (DREQ)
+    channel_config_set_dreq(cfg, DREQ_ADC);        
+    
+    return canal;
+}
+```
+
+---
+
+## O Loop Principal
+
+A CPU gerenciando tudo
+
+O `main` delega o trabalho pesado e foca no que importa:
+
+```c
+while (true) {
+    // 1. CPU manda o DMA iniciar o trabalho!
+    dma_channel_configure(canal_dma, &cfg, buffer_temp, &adc_hw->fifo, 10, true);
+    adc_run(true); 
+
+    // 2. Enquanto o DMA trabalha sozinho, a CPU cuida de outras coisas (ex: checar flags)
+    while (dma_channel_is_busy(canal_dma)) {
+        processar_eventos_pendentes(); // Checa se o botão foi apertado!
+    }
+    
+    // 3. DMA terminou! CPU calcula a média das 10 leituras de uma vez só
+    adc_run(false); 
+    float temperatura = calcular_temperatura(buffer_temp, 10);
+    
+    printf("Temperatura processada: %.2f C\n", temperatura);
+}
+```
+
+**Conclusão:** Sem o DMA, a CPU faria a leitura `1`, processaria, leitura `2`... atrasando o botão. Com o DMA, a CPU recebe as 10 leituras prontas "de bandeja".
+
+
+* **Vantagens:** Desempenho extremo para fluxos contínuos e grandes volumes de dados (streaming de áudio, envio de imagens para displays de vídeo, comunicação de rede). Evita o engasgo da CPU principal.
+* **Desvantagens:** Configuração inicial complexa. O programador precisa entender intimamente o funcionamento da memória e dos registradores (configurar o tamanho do dado em bits, endereços de origem e destino, e os sinais de *Data Request* - DREQ).
+
+
+## Código exemplo:
+
+````C
+#include <stdio.h>
+#include "pico/stdlib.h"
+#include "hardware/adc.h"
+#include "hardware/dma.h"
+#include "hardware/gpio.h"
+
+// -------------------------------------------------------------------------
+// DEFINIÇÕES E VARIÁVEIS GLOBAIS
+// -------------------------------------------------------------------------
+#define PINO_BOTAO_A 5
+#define LED_R 13
+#define LED_G 11
+#define LED_B 12
+
+#define AMOSTRAS 10
+uint16_t buffer_temp[AMOSTRAS]; 
+
+volatile int estado_cor = 0;
+volatile bool flag_mudou_cor = false;
+
+// -------------------------------------------------------------------------
+// FUNÇÕES DE CALLBACK (INTERRUPÇÃO)
+// -------------------------------------------------------------------------
+void botao_callback(uint gpio, uint32_t events) {
+    estado_cor = (estado_cor + 1) % 3;
+    gpio_put(LED_R, estado_cor == 0);
+    gpio_put(LED_G, estado_cor == 1);
+    gpio_put(LED_B, estado_cor == 2);
+    
+    flag_mudou_cor = true;
+}
+
+// -------------------------------------------------------------------------
+// FUNÇÕES DE CONFIGURAÇÃO (SETUP)
+// -------------------------------------------------------------------------
+void configurar_pinos_e_interrupcao() {
+    // LEDs
+    gpio_init(LED_R); gpio_set_dir(LED_R, GPIO_OUT);
+    gpio_init(LED_G); gpio_set_dir(LED_G, GPIO_OUT);
+    gpio_init(LED_B); gpio_set_dir(LED_B, GPIO_OUT);
+    
+    // Botão
+    gpio_init(PINO_BOTAO_A);
+    gpio_set_dir(PINO_BOTAO_A, GPIO_IN);
+    gpio_pull_up(PINO_BOTAO_A);
+
+    // Habilita interrupção
+    gpio_set_irq_enabled_with_callback(PINO_BOTAO_A, GPIO_IRQ_EDGE_FALL, true, &botao_callback);
+    
+    // Estado inicial
+    gpio_put(LED_R, 1);
+}
+
+void configurar_adc_temperatura() {
+    adc_init();
+    adc_set_temp_sensor_enabled(true); 
+    adc_select_input(4);               
+    adc_fifo_setup(true, true, 1, false, false);
+    adc_set_clkdiv(4800000); 
+}
+
+int configurar_dma(dma_channel_config *cfg) {
+    int canal = dma_claim_unused_channel(true);
+    *cfg = dma_channel_get_default_config(canal);
+    
+    channel_config_set_transfer_data_size(cfg, DMA_SIZE_16);
+    channel_config_set_read_increment(cfg, false); 
+    channel_config_set_write_increment(cfg, true); 
+    channel_config_set_dreq(cfg, DREQ_ADC);        
+    
+    return canal;
+}
+
+// -------------------------------------------------------------------------
+// FUNÇÕES DE LÓGICA DO NEGÓCIO E AUXILIARES
+// -------------------------------------------------------------------------
+float calcular_temperatura_celsius(uint16_t *buffer, int qtd_amostras) {
+    uint32_t soma = 0;
+    for (int i = 0; i < qtd_amostras; i++) {
+        soma += buffer[i];
+    }
+    float media_adc = (float)soma / qtd_amostras;
+    float tensao = media_adc * (3.3f / 4095.0f);
+    
+    // Fórmula do RP2040
+    return 27.0f - ((tensao - 0.706f) / 0.001721f);
+}
+
+void processar_eventos_pendentes() {
+    // Se a interrupção levantou a bandeira, fazemos o print pesado aqui
+    if (flag_mudou_cor) {
+        printf("\n[MAIN] Botao pressionado! Cor alterada (Estado: %d).\n", estado_cor);
+        flag_mudou_cor = false; 
+    }
+}
+
+// -------------------------------------------------------------------------
+// FUNÇÃO PRINCIPAL (MAIN)
+// -------------------------------------------------------------------------
+int main() {
+    // Inicialização do Sistema
+    stdio_init_all();
+    
+    // Trava elegante para aguardar o terminal serial abrir (como vimos antes)
+    while (!stdio_usb_connected()) {
+        sleep_ms(100);
+    }
+
+    printf("--- Monitor de Temperatura com DMA e Interrupcoes ---\n\n");
+
+    // Configurações usando os módulos criados
+    configurar_pinos_e_interrupcao();
+    configurar_adc_temperatura();
+    
+    dma_channel_config cfg;
+    int canal_dma = configurar_dma(&cfg);
+
+    // Loop Principal
+    while (true) {
+        
+        // 1. Inicia o DMA para ler as amostras
+        dma_channel_configure(canal_dma, &cfg, buffer_temp, &adc_hw->fifo, AMOSTRAS, true);
+        adc_run(true); 
+
+        // 2. Aguarda o DMA terminar, mas checando eventos (Botão) ativamente
+        while (dma_channel_is_busy(canal_dma)) {
+            processar_eventos_pendentes();
+        }
+        
+        // Finaliza ciclo do ADC
+        adc_run(false); 
+        adc_fifo_drain(); 
+
+        // 3. Processa e imprime os dados capturados
+        float temperatura = calcular_temperatura_celsius(buffer_temp, AMOSTRAS);
+        printf("Media de %d amostras calculada via DMA! Temperatura: %.2f C\n", AMOSTRAS, temperatura);
+        
+        // 4. Pausa não-bloqueante (1 segundo dividido em 100 partes de 10ms)
+        for(int i = 0; i < 100; i++) {
+            processar_eventos_pendentes();
+            sleep_ms(10); 
+        }
+    }
+
+    return 0;
+}
+````
 
 ---
 
@@ -159,24 +522,18 @@ graph TD
 
 ## Interrupções no Microcontrolador RP2040
 
-Para compreendermos o verdadeiro poder do microcontrolador RP2040 (o "cérebro" da Raspberry Pi Pico W), precisamos olhar para como ele organiza o caos quando múltiplas coisas acontecem ao mesmo tempo. A peça central desse quebra-cabeça é o **NVIC**.
+Para compreendermos como o microcontrolador RP2040, organiza quando múltiplas interrupções acontecem ao mesmo tempo. precisamos conhecer o **NVIC**.
 
-Aqui está a expansão do tópico, rica em analogias, exemplos práticos e diagramas para facilitar o entendimento dos alunos.
-
----
-
-## Interrupções no Microcontrolador RP2040
 ### O Módulo NVIC 
-O **NVIC** (*Nested Vectored Interrupt Controller*) é um subsistema de hardware embutido no núcleo ARM Cortex-M0+ do RP2040. Ele funciona como uma central telefônica inteligente entre os periféricos e o processador.
+O **NVIC** (*Nested Vectored Interrupt Controller*) é um subsistema de hardware embutido no núcleo ARM Cortex-M0+ do RP2040. Ele funciona como uma central inteligente entre os periféricos e o processador.
 
-* **A Analogia ** Imagine um pronto-socorro de um hospital. O processador (CPU) é o médico, que só pode atender um paciente por vez. O NVIC é o enfermeiro de triagem que fica na porta. Quando os pacientes (eventos de hardware) chegam, o enfermeiro avalia a gravidade (prioridade) de cada um e organiza a fila. O médico não precisa ir à recepção ver quem chegou; o enfermeiro simplesmente coloca o paciente mais urgente na frente dele.
+* O processador (CPU) só pode atender uma interrupção por vez. O NVIC é o responsável pela triagem das inerrupções. Quando os eventos de hardware chegam, o NVIC avalia a prioridade de cada um e organiza a fila. O processador não precisa conferir quem chegou; o NVIC simplesmente coloca o evento mais prioritário na frente.
 
 O NVIC faz essa organização em nível de hardware, ou seja, de forma praticamente instantânea (em poucos ciclos de clock), sem gastar processamento da CPU para decidir quem deve ser atendido.
 
 
-
 ### Fontes de Interrupção
-O RP2040 é capaz de gerenciar até **26 fontes diferentes de interrupção**. Cada tipo de periférico possui sua própria "linha direta" (IRQ - *Interrupt Request*) com o NVIC.
+O RP2040 é capaz de gerenciar até **26 fontes diferentes de interrupção** simultaneamente e 32 fonte no total. Cada tipo de periférico possui sua própria "linha direta" (IRQ - *Interrupt Request*) com o NVIC.
 
 * **Exemplos de Fontes:**
     * **GPIO:** Um botão foi pressionado (IRQ do pino).
