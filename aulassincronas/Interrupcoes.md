@@ -733,6 +733,85 @@ graph TD
 
 *Dica:* Usem os parâmetros `(uint gpio, uint32_t events)` da função callback com um `if/else`!
 
+# Código apresentado
+
+````C
+#include <stdio.h>
+#include "pico/stdlib.h"
+#include "hardware/gpio.h"
+
+
+#define PINO_BOTAO_A 5
+#define PINO_BOTAO_B 6
+#define LED_VERDE 11
+#define LED_AZUL 12
+
+volatile bool flag_botao_a  = false;
+volatile bool flag_botao_b  = false;
+
+void botoes_callback(uint gpio, uint32_t events){
+    if (gpio == PINO_BOTAO_A){
+        bool estado_atual = gpio_get(LED_VERDE);
+        gpio_put(LED_VERDE, !estado_atual);
+
+        flag_botao_a = true;
+    } else if(gpio == PINO_BOTAO_B){
+        bool estado_atual = gpio_get(LED_AZUL);
+        gpio_put(LED_AZUL, !estado_atual);
+
+        flag_botao_b = true;
+    }
+
+}
+
+int main(){
+    stdio_init_all();
+
+    //configurar os leds
+    gpio_init(LED_VERDE);
+    gpio_set_dir(LED_VERDE, GPIO_OUT);
+    gpio_put(LED_VERDE,0);
+
+    gpio_init(LED_AZUL);
+    gpio_set_dir(LED_AZUL, GPIO_OUT);
+    gpio_put(LED_AZUL,0);
+
+    //configurar botoes
+
+    gpio_init(PINO_BOTAO_A);
+    gpio_set_dir(PINO_BOTAO_A, GPIO_IN);
+    gpio_pull_up(PINO_BOTAO_A);
+
+    gpio_init(PINO_BOTAO_B);
+    gpio_set_dir(PINO_BOTAO_B, GPIO_IN);
+    gpio_pull_up(PINO_BOTAO_B);
+
+    //configurar a interrupção
+    gpio_set_irq_enabled_with_callback(PINO_BOTAO_A, GPIO_IRQ_EDGE_FALL, true, &botoes_callback);
+    gpio_set_irq_enabled(PINO_BOTAO_B, GPIO_IRQ_EDGE_FALL, true);
+
+    while(true){
+
+        if(flag_botao_a){
+            printf("Botao A pressionado!\n");
+            flag_botao_a = false;
+        }
+        if(flag_botao_b){
+            printf("Botao B pressionado!\n");
+            flag_botao_b = false;
+        }
+
+        sleep_ms(20);
+
+
+
+    }
+
+
+
+}
+
+````
 ---
 
 ## Fechamento
