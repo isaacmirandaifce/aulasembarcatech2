@@ -45,7 +45,7 @@ flowchart LR
 #include "pico/stdlib.h"
 
 #define BOTAO_A 5 // Botão A na GPIO 5
-#define LED_R 11  // Canal Vermelho do LED RGB na GPIO 11
+#define LED_R 13  // Canal Vermelho do LED RGB na GPIO 13
 
 int main() {
     stdio_init_all();
@@ -143,7 +143,7 @@ flowchart TD
 #include "pico/stdlib.h"
 
 #define BOTAO_A 5
-#define LED_R 11
+#define LED_R 13
 #define BUZZER_A 21
 
 void emitir_bip(uint pino, uint frequencia, uint duracao_ms) {
@@ -252,8 +252,8 @@ int main() {
 // Mapeamento de Pinos (Ajuste o LED_G conforme a pinagem exata do seu LED RGB)
 #define BOTAO_A 5
 #define BOTAO_B 6
-#define LED_R 11
-#define LED_G 12 
+#define LED_R 13
+#define LED_G 11 
 #define BUZZER_A 21
 
 // -----------------------------------------------------------
@@ -425,8 +425,8 @@ int main() {
 #define BOTAO_A 5
 #define BOTAO_B 6
 #define BOTAO_JOYSTICK 22 // Pino do clique do Joystick (Ajustar se necessário)
-#define LED_R 11
-#define LED_G 12 
+#define LED_R 13
+#define LED_G 11 
 #define BUZZER_A 21
 
 // -----------------------------------------------------------
