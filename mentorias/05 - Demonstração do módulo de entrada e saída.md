@@ -3,7 +3,6 @@
 * **Tema:** Controle de atuadores e leitura de sensores na prática.
 * **Plataforma Alvo:** BitDogLab (Raspberry Pi Pico W / RP2040).
 * **Ferramentas:** VS Code, Pico C/C++ SDK, CMake.
-* **Duração:** 60 Minutos.
 
 ---
 
@@ -180,6 +179,9 @@ int main() {
 ---
 
 ## Conceito: Teclado Matricial e Varredura
+
+![Teclado Membrana](https://raw.githubusercontent.com/isaacmirandaifce/aulasembarcatech2/refs/heads/main/mentorias/imagens/teclado_membrana.jpg)
+
 
 * **Otimização de Hardware:** Teclados 4x4 usam 8 pinos (4 linhas + 4 colunas) em vez de 16 pinos individuais.
 * **Como funciona (Varredura):** O microcontrolador energiza uma linha por vez e lê as colunas para encontrar o cruzamento.
