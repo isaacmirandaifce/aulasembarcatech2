@@ -32,7 +32,7 @@ flowchart LR
 
 ## Conceitos: Leitura de Botão e LED RGB
 
-* **Mapeamento:** Utilizaremos o Botão A (GPIO 5) e o canal Vermelho do LED RGB (GPIO 11).
+* **Mapeamento:** Utilizaremos o Botão A (GPIO 5) e o canal Vermelho do LED RGB (GPIO 13).
 * **`gpio_set_dir()`:** Define se a energia sai do pino (OUT = Atuador) ou se o pino apenas "escuta" (IN = Sensor).
 * **`gpio_pull_up()`:** Mantém o pino em estado lógico "1" (Alta) quando o botão não está pressionado, evitando flutuações.
 
