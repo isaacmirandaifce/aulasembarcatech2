@@ -26,7 +26,7 @@ flowchart LR
     style C fill:#e8f5e9,stroke:#1b5e20,color:black
 ```
 
-> 💬 **Pergunta:** *"Se o nosso programa nunca pode terminar, qual estrutura da linguagem C nós obrigatoriamente precisamos usar na função `main()`?"*
+> **Pergunta:** *"Se o nosso programa nunca pode terminar, qual estrutura da linguagem C nós obrigatoriamente precisamos usar na função `main()`?"*
 
 ---
 
@@ -187,7 +187,7 @@ int main() {
 * **Como funciona (Varredura):** O microcontrolador energiza uma linha por vez e lê as colunas para encontrar o cruzamento.
 * **Nossa Simulação:** O Botão A (GPIO 5) simulará a Coluna 1, e o Botão B (GPIO 6) simulará a Coluna 2.
 
-> 💬 **Pergunta:** *"Por que um teclado matricial 4x4 economiza pinos do microcontrolador em comparação a ligar cada botão individualmente?"*
+> **Pergunta:** *"Por que um teclado matricial 4x4 economiza pinos do microcontrolador em comparação a ligar cada botão individualmente?"*
 
 ---
 
