@@ -1,4 +1,4 @@
-## 🐶 Interfaces de Comunicação Serial com RP2040 e BitDogLab
+## Interfaces de Comunicação Serial com RP2040 e BitDogLab
 ### Mentoria Prática de Sistemas Embarcados
 ---
 
