@@ -56,8 +56,8 @@ graph TD
         BROKER --> DB[(Banco de Dados Seguros)]
     end
     
-    style BUZ fill:#ffcccc,stroke:#ff0000
-    style OLED fill:#ccffff,stroke:#00cccc
+    style BUZ fill:#ffcccc,stroke:#ff0000,color:black
+    style OLED fill:#ccffff,stroke:#00cccc,color:black
 ```
 
 ## Caso de Estudo 2: Manutenção Preditiva (Indústria 4.0)
@@ -92,8 +92,8 @@ graph LR
         MQTT --> MANUTENCAO[Equipe de Manutenção]
     end
     
-    style LED_R fill:#ff9999,stroke:#cc0000
-    style LED_G fill:#99ff99,stroke:#00cc00
+    style LED_R fill:#ff9999,stroke:#cc0000,color:black
+    style LED_G fill:#99ff99,stroke:#00cc00,color:black
 ```
 
 A Nuvem só é acionada quando o RP2040 detecta o problema localmente. Isso economiza banda e energia!
@@ -132,9 +132,9 @@ graph LR
         BROKER -->|Alerta de Silo Cheio| APP[App do Celular]
     end
     
-    style US fill:#e6f2ff,stroke:#0066cc
-    style LORA fill:#e6ffe6,stroke:#00cc44
-    style BAT fill:#fff2e6,stroke:#ff9933
+    style US fill:#e6f2ff,stroke:#0066cc,color:black
+    style LORA fill:#e6ffe6,stroke:#00cc44,color:black
+    style BAT fill:#fff2e6,stroke:#ff9933,color:black
 ```
 
 RP2040 não fica ligado 100% do tempo. Ele acorda a cada 1 hora, lê o sensor ultrassônico, envia o pacote via LoRa e volta a dormir. É assim que garantimos a sobrevivência do hardware no campo!)*
@@ -188,9 +188,9 @@ graph TD
         BROKER -->|Aciona| SIRENE[Sirene de Alerta no Bairro]
     end
     
-    style B_SENSOR fill:#cce5ff,stroke:#004080
-    style LORA fill:#e6ffe6,stroke:#00cc44
-    style SIRENE fill:#ffcccc,stroke:#cc0000
+    style B_SENSOR fill:#cce5ff,stroke:#004080,color:black
+    style LORA fill:#e6ffe6,stroke:#00cc44,color:black
+    style SIRENE fill:#ffcccc,stroke:#cc0000,color:black
 ```
 
 Aqui o RP2040 atua como uma sentinela. Ele pode usar as portas digitais da BitDogLab para ler um sensor de boia simples. Enquanto a água não sobe, não há envio de mensagens, o que economiza bateria e não congestiona a rede pública!
